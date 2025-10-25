@@ -89,76 +89,73 @@ src/test/java/racingcar
 ### 클래스 다이어그램
 ```
 ┌─────────────────────────┐
-│  RacingGameController   │
-│─────────────────────────│
-│ - inputView             │
-│ - outputView            │
-│─────────────────────────│
-│ + run()                 │
-│ - playGame()            │
-│ - printWinners()        │
-└─────────┬───────────────┘
-          │
-          ├──────────────────┐
-          │                  │
-          ▼                  ▼
-┌──────────────┐   ┌──────────────┐
-│  InputView   │   │  OutputView  │
-│──────────────│   │──────────────│
-│+ readCarNames() │ + printResultHeader() │
-│+ readTryCount() │ + printRoundResult()  │
-└──────────────┘   │ + printWinners()      │
-                   └──────────────┘
-          │
-          │ creates
-          ▼
-┌─────────────────┐
-│  RacingGame     │
-│─────────────────│
-│ - cars          │
-│ - tryCount      │
-│ - condition     │
-│ - currentRound  │
-│─────────────────│
-│ + playRound()   │
-│ + hasNextRound()│
-│ + getCars()     │
-│ + getWinners()  │
-└─────────┬───────┘
-          │ has
-          ▼
-┌─────────────────┐       ┌──────────────────┐
-│     Cars        │◆─────▶│       Car        │
-│─────────────────│       │──────────────────│
-│ - cars          │       │ - name: String   │
-│─────────────────│       │ - position: int  │
-│ + moveAll()     │       │──────────────────│
-│ + getWinners()  │       │ + move(boolean)  │
-│ + getMaxPosition() │    │ + getPosition()  │
-│ + getCars()     │       │ + getName()      │
-└─────────────────┘       │ + getStatusBar() │
-                          └───────┬──────────┘
-                                  │
-                                  │ uses
-                                  ▼
-                          ┌──────────────────────┐
-                          │  <<interface>>       │
-                          │   MoveCondition      │
-                          │──────────────────────│
-                          │ + isSatisfied()      │
-                          └──────────┬───────────┘
-                                     │
-                                     │ implements
-                                     ▼
-                          ┌─────────────────────────────┐
-                          │  RandomMoveCondition        │
-                          │─────────────────────────────│
-                          │ - MOVE_THRESHOLD = 4        │
-                          │ - MIN_RANDOM_VALUE = 0      │
-                          │ - MAX_RANDOM_VALUE = 9      │
-                          │─────────────────────────────│
-                          │ + isSatisfied(): boolean    │
-                          └─────────────────────────────┘
+                │  RacingGameController   │
+                │─────────────────────────│
+                │ - inputView             │
+                │ - outputView            │
+                │─────────────────────────│
+                │ + run()                 │
+                │ - playGame()            │
+                │ - printWinners()        │
+                └─────────┬───────────────┘
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+              ▼                       ▼
+    ┌──────────────────┐    ┌──────────────────────┐
+    │   InputView      │    │    OutputView        │
+    │──────────────────│    │──────────────────────│
+    │+ readCarNames()  │    │+ printResultHeader() │
+    │+ readTryCount()  │    │+ printRoundResult()  │
+    └──────────────────┘    │+ printWinners()      │
+              │             └──────────────────────┘
+              │ creates
+              ▼
+    ┌─────────────────────┐
+    │    RacingGame       │
+    │─────────────────────│
+    │ - cars              │
+    │ - tryCount          │
+    │ - condition         │
+    │ - currentRound      │
+    │─────────────────────│
+    │ + playRound()       │
+    │ + hasNextRound()    │
+    │ + getCars()         │
+    │ + getWinners()      │
+    └──────────┬──────────┘
+               │ has
+               ▼
+    ┌─────────────────────┐            ┌──────────────────┐
+    │       Cars          │◆──────────▶│       Car        │
+    │─────────────────────│            │──────────────────│
+    │ - cars              │            │ - name           │
+    │─────────────────────│            │ - position       │
+    │ + moveAll()         │            │──────────────────│
+    │ + getWinners()      │            │ + move()         │
+    │ + getMaxPosition()  │            │ + getPosition()  │
+    │ + getCars()         │            │ + getName()      │
+    └─────────────────────┘            │ + getStatusBar() │
+                                       └────────┬─────────┘
+                                                │ uses
+                                                ▼
+                                ┌──────────────────────────┐
+                                │    <<interface>>         │
+                                │    MoveCondition         │
+                                │──────────────────────────│
+                                │ + isSatisfied(): boolean │
+                                └────────────┬─────────────┘
+                                             │ implements
+                                             ▼
+                                ┌─────────────────────────────┐
+                                │  RandomMoveCondition        │
+                                │─────────────────────────────│
+                                │ - MOVE_THRESHOLD = 4        │
+                                │ - MIN_RANDOM_VALUE = 0      │
+                                │ - MAX_RANDOM_VALUE = 9      │
+                                │─────────────────────────────│
+                                │ + isSatisfied(): boolean    │
+                                └─────────────────────────────┘
 ```
 
 ---
