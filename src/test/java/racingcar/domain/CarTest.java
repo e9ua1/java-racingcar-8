@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,6 +100,46 @@ public class CarTest {
 
             // then
             assertThat(car.getPosition()).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    @DisplayName("자동차 상태 표현")
+    class StatusTest {
+
+        @Test
+        @DisplayName("위치가 0이면 빈 문자열을 반환한다")
+        void statusBarWhenPositionZero() {
+            // given
+            Car car = new Car("pobi");
+
+            // when
+            String statusBar = car.getStatusBar();
+
+            // then
+            assertThat(statusBar).isEmpty();
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "1, '-'",
+                "2, '--'",
+                "3, '---'",
+                "5, '-----'"
+        })
+        @DisplayName("위치만큼 '-' 문자를 반환한다")
+        void statusBarWithPosition(int moveCount, String expected) {
+            // given
+            Car car = new Car("pobi");
+            for (int i = 0; i < moveCount; i++) {
+                car.move(true);
+            }
+
+            // when
+            String statusBar = car.getStatusBar();
+
+            // then
+            assertThat(statusBar).isEqualTo(expected);
         }
     }
 }
