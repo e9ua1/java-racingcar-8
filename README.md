@@ -71,8 +71,6 @@ src/main/java/racingcar
 │   └── condition
 │       ├── MoveCondition.java
 │       └── RandomMoveCondition.java
-├── validation
-│   └── InputValidator.java
 └── view
     ├── InputView.java
     └── OutputView.java
@@ -84,8 +82,6 @@ src/test/java/racingcar
 │   ├── RacingGameTest.java
 │   └── condition
 │       └── RandomMoveConditionTest.java
-└── validation
-    └── InputValidatorTest.java
 ```
 
 ---
@@ -97,78 +93,72 @@ src/test/java/racingcar
 │─────────────────────────│
 │ - inputView             │
 │ - outputView            │
-│ - racingGame            │
 │─────────────────────────│
 │ + run()                 │
-└─────────────────────────┘
-         │
-         ├──────────────────┐
-         │                  │
-         ▼                  ▼
+│ - playGame()            │
+│ - printWinners()        │
+└─────────┬───────────────┘
+          │
+          ├──────────────────┐
+          │                  │
+          ▼                  ▼
 ┌──────────────┐   ┌──────────────┐
 │  InputView   │   │  OutputView  │
 │──────────────│   │──────────────│
-│              │   │              │
-│──────────────│   │──────────────│
-│+ readNames() │   │+ printRound()│
-│+ readCount() │   │+ printWinner()│
-└──────────────┘   └──────────────┘
-         │
-         ▼
-┌──────────────────┐
-│ InputValidator   │
-│──────────────────│
-│                  │
-│──────────────────│
-│+ validateName()  │
-│+ validateCount() │
-└──────────────────┘
-
+│+ readCarNames() │ + printResultHeader() │
+│+ readTryCount() │ + printRoundResult()  │
+└──────────────┘   │ + printWinners()      │
+                   └──────────────┘
+          │
+          │ creates
+          ▼
 ┌─────────────────┐
 │  RacingGame     │
 │─────────────────│
 │ - cars          │
 │ - tryCount      │
 │ - condition     │
+│ - currentRound  │
 │─────────────────│
 │ + playRound()   │
+│ + hasNextRound()│
+│ + getCars()     │
 │ + getWinners()  │
-└─────────────────┘
-         │
-         │ uses
-         ▼
+└─────────┬───────┘
+          │ has
+          ▼
 ┌─────────────────┐       ┌──────────────────┐
 │     Cars        │◆─────▶│       Car        │
 │─────────────────│       │──────────────────│
-│ - carList       │       │ - name           │
-│─────────────────│       │ - position       │
+│ - cars          │       │ - name: String   │
+│─────────────────│       │ - position: int  │
 │ + moveAll()     │       │──────────────────│
-│ + getWinners()  │       │ + move()         │
-│ + getMaxPos()   │       │ + getPosition()  │
-└─────────────────┘       │ + getName()      │
-                          │ + getStatusBar() │
-                          └──────────────────┘
-                                   │
-                                   │ uses
-                                   ▼
+│ + getWinners()  │       │ + move(boolean)  │
+│ + getMaxPosition() │    │ + getPosition()  │
+│ + getCars()     │       │ + getName()      │
+└─────────────────┘       │ + getStatusBar() │
+                          └───────┬──────────┘
+                                  │
+                                  │ uses
+                                  ▼
                           ┌──────────────────────┐
+                          │  <<interface>>       │
                           │   MoveCondition      │
                           │──────────────────────│
                           │ + isSatisfied()      │
-                          └──────────────────────┘
-                                   △
-                                   │
-                          ┌────────┴─────────┐
-                          │                  │
-                ┌─────────────────────────────────┐
-                │  RandomMoveCondition            │
-                │─────────────────────────────────│
-                │ - MOVE_THRESHOLD = 4            │
-                │ - MIN_RANDOM_VALUE = 0          │
-                │ - MAX_RANDOM_VALUE = 9          │
-                │─────────────────────────────────│
-                │ + isSatisfied()                 │
-                └─────────────────────────────────┘
+                          └──────────┬───────────┘
+                                     │
+                                     │ implements
+                                     ▼
+                          ┌─────────────────────────────┐
+                          │  RandomMoveCondition        │
+                          │─────────────────────────────│
+                          │ - MOVE_THRESHOLD = 4        │
+                          │ - MIN_RANDOM_VALUE = 0      │
+                          │ - MAX_RANDOM_VALUE = 9      │
+                          │─────────────────────────────│
+                          │ + isSatisfied(): boolean    │
+                          └─────────────────────────────┘
 ```
 
 ---
@@ -182,13 +172,18 @@ src/test/java/racingcar
 - 자동차의 이름과 위치를 관리한다.
 - 주어진 조건에 따라 전진한다.
 - 현재 위치를 시각적으로 표현한다.
+- 생성 시 이름 유효성을 검증한다.
 
 **주요 메서드:**
-- `Car(String name)`: 이름으로 자동차 생성
+- `Car(String name)`: 이름으로 자동차 생성 (이름 검증 포함)
 - `void move(boolean canMove)`: 조건이 참이면 전진
 - `int getPosition()`: 현재 위치 반환
 - `String getName()`: 자동차 이름 반환
 - `String getStatusBar()`: 위치만큼 `-` 문자 반환
+
+**검증 규칙:**
+- 이름은 1자 이상 5자 이하
+- 이름은 공백만으로 구성될 수 없음
 
 ---
 
@@ -197,13 +192,17 @@ src/test/java/racingcar
 - 여러 자동차를 관리한다.
 - 모든 자동차를 일괄 이동시킨다.
 - 우승자를 판정한다.
+- 생성 시 자동차 개수를 검증한다.
 
 **주요 메서드:**
-- `Cars(List<String> names)`: 이름 목록으로 자동차들 생성
+- `Cars(List<String> names)`: 이름 목록으로 자동차들 생성 (검증 포함)
 - `void moveAll(MoveCondition condition)`: 모든 자동차 이동
 - `List<String> getWinners()`: 우승자 이름 목록 반환
 - `int getMaxPosition()`: 최대 전진 거리 반환
 - `List<Car> getCars()`: 자동차 목록 반환
+
+**검증 규칙:**
+- 최소 1대 이상의 자동차 필요
 
 ---
 
@@ -236,33 +235,17 @@ src/test/java/racingcar
 - 경주의 전체 흐름을 관리한다.
 - 지정된 횟수만큼 라운드를 진행한다.
 - 각 라운드의 결과를 제공한다.
+- 생성 시 시도 횟수를 검증한다.
 
 **주요 메서드:**
-- `RacingGame(Cars cars, int tryCount, MoveCondition condition)`: 게임 생성
+- `RacingGame(Cars cars, int tryCount, MoveCondition condition)`: 게임 생성 (검증 포함)
 - `void playRound()`: 한 라운드 진행
 - `boolean hasNextRound()`: 다음 라운드 존재 여부
 - `Cars getCars()`: 현재 자동차 상태 반환
 - `List<String> getWinners()`: 최종 우승자 반환
 
----
-
-#### **검증 계층 (validation)**
-
-##### `InputValidator` - 입력 검증
-**책임:**
-- 자동차 이름의 유효성을 검증한다.
-- 시도 횟수의 유효성을 검증한다.
-- 잘못된 입력에 대해 예외를 발생시킨다.
-
-**주요 메서드:**
-- `void validateCarName(String name)`: 이름 검증 (5자 이하, 공백 불가)
-- `void validateCarNames(List<String> names)`: 이름 목록 검증
-- `void validateTryCount(int count)`: 시도 횟수 검증 (양수)
-
 **검증 규칙:**
-- 이름은 1자 이상 5자 이하
-- 이름은 공백만으로 구성될 수 없음
-- 시도 횟수는 1 이상의 정수
+- 시도 횟수는 1 이상
 
 ---
 
@@ -272,7 +255,6 @@ src/test/java/racingcar
 **책임:**
 - 사용자로부터 입력을 받는다.
 - 입력값을 적절한 형태로 파싱한다.
-- 입력값의 유효성을 검증한다.
 
 **주요 메서드:**
 - `List<String> readCarNames()`: 자동차 이름 목록 입력
@@ -310,10 +292,12 @@ honux : --
 **책임:**
 - 애플리케이션의 전체 흐름을 제어한다.
 - View와 Domain을 연결한다.
-- 예외를 처리한다.
+- 예외를 전파한다.
 
 **주요 메서드:**
 - `void run()`: 게임 실행
+- `void playGame(RacingGame game)`: 게임 진행
+- `void printWinners(RacingGame game)`: 우승자 출력
 
 **실행 흐름:**
 1. 자동차 이름 입력
@@ -329,7 +313,7 @@ honux : --
 ```
 Application
     ↓
-RacingGameController ←→ InputView ←→ InputValidator
+RacingGameController ←→ InputView
     ↓                      ↓
     ↓                 OutputView
     ↓
@@ -344,11 +328,11 @@ Car[] + MoveCondition
 
 #### 1️⃣ 게임 초기화
 ```
-Controller → InputView → InputValidator
+Controller → InputView
          ↓
-    Cars 생성 → Car 객체들 생성
+    Cars 생성 → Car 객체들 생성 (각자 이름 검증)
          ↓
-    RacingGame 생성 (Cars, tryCount, MoveCondition)
+    RacingGame 생성 (Cars, tryCount 검증, MoveCondition)
 ```
 
 #### 2️⃣ 라운드 진행 (반복)
@@ -389,10 +373,9 @@ Controller → OutputView.printWinners(winners)
 |------|--------|------|
 | **Controller** | RacingGameController | 전체 흐름 제어, View와 Domain 연결 |
 | **View** | InputView, OutputView | 사용자 입출력 |
-| **Validation** | InputValidator | 입력값 검증 |
-| **Domain** | RacingGame | 게임 진행 관리 |
-| **Domain** | Cars | 자동차 집합 관리 (일급 컬렉션) |
-| **Domain** | Car | 개별 자동차 상태 및 이동 |
+| **Domain** | RacingGame | 게임 진행 관리, tryCount 검증 |
+| **Domain** | Cars | 자동차 집합 관리 (일급 컬렉션), 개수 검증 |
+| **Domain** | Car | 개별 자동차 상태 및 이동, 이름 검증 |
 | **Domain** | MoveCondition | 전진 조건 판단 |
 
 ---
@@ -434,6 +417,20 @@ Controller → OutputView.printWinners(winners)
     └── 최대 위치를 계산한다
 ```
 
+#### `RacingGameTest` - 경주 게임 테스트
+```
+경주 게임 테스트
+├── 게임 생성
+│   ├── 게임을 생성한다
+│   └── 시도 횟수가 1 미만이면 예외가 발생한다
+├── 게임 진행
+│   ├── 라운드를 진행하면 모든 자동차가 이동한다
+│   └── 지정된 횟수만큼 라운드가 존재한다
+└── 게임 결과
+    ├── 게임 종료 후 우승자를 반환한다
+    └── 현재 자동차 상태를 조회한다
+```
+
 #### `RandomMoveConditionTest` - 이동 조건 테스트
 ```
 무작위 이동 조건 테스트
@@ -444,28 +441,14 @@ Controller → OutputView.printWinners(winners)
     └── 항상 boolean 값을 반환한다
 ```
 
-#### `InputValidatorTest` - 입력 검증 테스트
-```
-입력 검증 테스트
-├── 이름 검증
-│   ├── 정상적인 이름은 통과한다
-│   ├── 빈 이름은 예외가 발생한다
-│   ├── 5자 초과 이름은 예외가 발생한다
-│   └── 공백만 있는 이름은 예외가 발생한다
-└── 시도 횟수 검증
-    ├── 양수는 통과한다
-    ├── 0은 예외가 발생한다
-    └── 음수는 예외가 발생한다
-```
-
 ---
 
 ## 구현 순서
 1. [x] 도메인 계층 (Car, Cars, RacingGame, MoveCondition)
-2. [x] 검증 계층 (InputValidator)
-3. [x] 뷰 계층 (InputView, OutputView)
-4. [x] 컨트롤러 통합 (RacingGameController)
-5. [x] 리팩토링 및 테스트
+2. [x] 뷰 계층 (InputView, OutputView)
+3. [x] 컨트롤러 통합 (RacingGameController)
+4. [x] 리팩토링 - 도메인 중심 검증으로 전환
+5. [x] 테스트 완성
 
 ---
 
@@ -521,3 +504,23 @@ jun : --
 4. **라이브러리**: 제공된 `Randoms`, `Console` 라이브러리 사용 필수
 5. **커밋**: 기능 단위로 작게 나누어 커밋
 6. **코드 품질**: 1주차 피드백 반영 (이름 짓기, 공백, 주석 등)
+
+---
+
+## 핵심 설계 결정
+
+### 1. 도메인 중심 검증
+- **Car**: 생성자에서 이름 검증 (빈 값, 5자 초과)
+- **Cars**: 생성자에서 자동차 개수 검증 (최소 1대)
+- **RacingGame**: 생성자에서 tryCount 검증 (1 이상)
+- 도메인 객체가 스스로 유효성을 보장하는 객체지향적 설계
+
+### 2. 전략 패턴
+- MoveCondition 인터페이스로 이동 조건 추상화
+- RandomMoveCondition 구현체
+- 테스트에서 조건을 주입하여 검증 용이
+
+### 3. 일급 컬렉션
+- Cars 클래스로 List<Car> 캡슐화
+- 자동차 집합 관련 로직 응집
+- 우승자 판정, 일괄 이동 등 책임 명확
