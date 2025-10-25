@@ -21,38 +21,38 @@
 ## 기능 요구사항
 
 ### 입력
-- [ ] 경주할 자동차 이름을 쉼표(`,`)로 구분하여 입력받는다.
-- [ ] 시도할 횟수를 입력받는다.
+- [x] 경주할 자동차 이름을 쉼표(`,`)로 구분하여 입력받는다.
+- [x] 시도할 횟수를 입력받는다.
 
 ### 자동차 생성 및 검증
-- [ ] 자동차 이름은 5자 이하만 가능하다.
-- [ ] 자동차 이름이 빈 값이면 예외를 발생시킨다.
-- [ ] 자동차 이름이 5자를 초과하면 예외를 발생시킨다.
-- [ ] 입력된 이름으로 자동차 객체들을 생성한다.
+- [x] 자동차 이름은 5자 이하만 가능하다.
+- [x] 자동차 이름이 빈 값이면 예외를 발생시킨다.
+- [x] 자동차 이름이 5자를 초과하면 예외를 발생시킨다.
+- [x] 입력된 이름으로 자동차 객체들을 생성한다.
 
 ### 경주 진행
-- [ ] 0에서 9 사이의 무작위 값을 생성한다.
-- [ ] 무작위 값이 4 이상이면 전진한다.
-- [ ] 무작위 값이 4 미만이면 정지한다.
-- [ ] 각 자동차는 독립적으로 전진 여부를 판단한다.
-- [ ] 주어진 횟수만큼 경주를 반복한다.
-- [ ] 매 회차마다 각 자동차의 이동 결과를 출력한다.
+- [x] 0에서 9 사이의 무작위 값을 생성한다.
+- [x] 무작위 값이 4 이상이면 전진한다.
+- [x] 무작위 값이 4 미만이면 정지한다.
+- [x] 각 자동차는 독립적으로 전진 여부를 판단한다.
+- [x] 주어진 횟수만큼 경주를 반복한다.
+- [x] 매 회차마다 각 자동차의 이동 결과를 출력한다.
 
 ### 우승자 판정
-- [ ] 가장 많이 전진한 자동차를 찾는다.
-- [ ] 우승자가 여러 명이면 모두 출력한다.
-- [ ] 우승자가 여러 명일 경우 쉼표(`,`)와 공백으로 구분한다.
+- [x] 가장 많이 전진한 자동차를 찾는다.
+- [x] 우승자가 여러 명이면 모두 출력한다.
+- [x] 우승자가 여러 명일 경우 쉼표(`,`)와 공백으로 구분한다.
 
 ### 출력
-- [ ] 각 회차마다 자동차 이름과 전진 상태를 출력한다.
-    - 형식: `{자동차이름} : {-의 개수}`
-- [ ] 최종 우승자를 출력한다.
-    - 단독 우승: `최종 우승자 : {이름}`
-    - 공동 우승: `최종 우승자 : {이름1}, {이름2}`
+- [x] 각 회차마다 자동차 이름과 전진 상태를 출력한다.
+  - 형식: `{자동차이름} : {-의 개수}`
+- [x] 최종 우승자를 출력한다.
+  - 단독 우승: `최종 우승자 : {이름}`
+  - 공동 우승: `최종 우승자 : {이름1}, {이름2}`
 
 ### 예외 처리
-- [ ] 잘못된 값 입력 시 `IllegalArgumentException`을 발생시킨다.
-- [ ] 예외 발생 후 애플리케이션은 종료된다.
+- [x] 잘못된 값 입력 시 `IllegalArgumentException`을 발생시킨다.
+- [x] 예외 발생 후 애플리케이션은 종료된다.
 
 ---
 
@@ -325,44 +325,75 @@ honux : --
 
 ## 객체 간 협력 흐름
 
-### 1. 게임 시작
+### 전체 흐름도
 ```
-Controller → InputView: 자동차 이름 요청
-InputView → InputValidator: 이름 검증
-InputView → Controller: 검증된 이름 목록 반환
-
-Controller → InputView: 시도 횟수 요청
-InputView → InputValidator: 횟수 검증
-InputView → Controller: 검증된 횟수 반환
-
-Controller: Cars 객체 생성
-Controller: RacingGame 객체 생성
-```
-
-### 2. 게임 진행
-```
-Controller → RacingGame: 라운드 진행 요청
-RacingGame → Cars: 모든 자동차 이동 명령
-Cars → Car[]: 각 자동차에게 이동 명령
-Car → MoveCondition: 전진 가능 여부 확인
-MoveCondition: 무작위 값 생성 및 판단
-Car: 조건에 따라 전진 또는 정지
-
-Controller → OutputView: 라운드 결과 출력 요청
-OutputView → Cars: 각 자동차 상태 조회
-OutputView: 콘솔에 결과 출력
+Application
+    ↓
+RacingGameController ←→ InputView ←→ InputValidator
+    ↓                      ↓
+    ↓                 OutputView
+    ↓
+RacingGame
+    ↓
+Cars (일급 컬렉션)
+    ↓
+Car[] + MoveCondition
 ```
 
-### 3. 게임 종료
-```
-RacingGame → Cars: 우승자 조회
-Cars: 최대 위치 계산
-Cars: 최대 위치와 같은 자동차 필터링
-Cars → RacingGame: 우승자 목록 반환
+### 상세 협력 과정
 
-Controller → OutputView: 우승자 출력 요청
-OutputView: 콘솔에 우승자 출력
+#### 1️⃣ 게임 초기화
 ```
+Controller → InputView → InputValidator
+         ↓
+    Cars 생성 → Car 객체들 생성
+         ↓
+    RacingGame 생성 (Cars, tryCount, MoveCondition)
+```
+
+#### 2️⃣ 라운드 진행 (반복)
+```
+Controller → RacingGame.playRound()
+         ↓
+    Cars.moveAll(condition)
+         ↓
+    각 Car.move(condition.isSatisfied())
+         ↓
+    RandomMoveCondition (0~9 무작위 → 4 이상이면 true)
+         ↓
+    Car.position 증가 또는 유지
+         ↓
+Controller → OutputView.printRoundResult(Cars)
+         ↓
+    각 Car의 이름과 위치(-) 출력
+```
+
+#### 3️⃣ 우승자 판정
+```
+Controller → RacingGame.getWinners()
+         ↓
+    Cars.getWinners()
+         ↓
+    Cars.getMaxPosition() → 최대 위치 계산
+         ↓
+    최대 위치와 같은 Car들의 이름 수집
+         ↓
+Controller → OutputView.printWinners(winners)
+         ↓
+    쉼표로 구분된 우승자 출력
+```
+
+### 계층별 책임
+
+| 계층 | 클래스 | 책임 |
+|------|--------|------|
+| **Controller** | RacingGameController | 전체 흐름 제어, View와 Domain 연결 |
+| **View** | InputView, OutputView | 사용자 입출력 |
+| **Validation** | InputValidator | 입력값 검증 |
+| **Domain** | RacingGame | 게임 진행 관리 |
+| **Domain** | Cars | 자동차 집합 관리 (일급 컬렉션) |
+| **Domain** | Car | 개별 자동차 상태 및 이동 |
+| **Domain** | MoveCondition | 전진 조건 판단 |
 
 ---
 
@@ -429,65 +460,63 @@ OutputView: 콘솔에 우승자 출력
 
 ---
 
-## 구현 순서
-
 ### 1단계: 프로젝트 설정
 - [x] 패키지 구조 생성
 - [x] README.md 작성
 
 ### 2단계: 도메인 모델 (TDD)
-- [ ] `Car` 클래스
-    - [ ] 테스트: 생성 및 이름 반환
-    - [ ] 구현: 생성자, getName()
-    - [ ] 테스트: 전진 기능
-    - [ ] 구현: move(), getPosition()
-    - [ ] 테스트: 상태 표현
-    - [ ] 구현: getStatusBar()
+- [x] `Car` 클래스
+  - [x] 테스트: 생성 및 이름 반환
+  - [x] 구현: 생성자, getName()
+  - [x] 테스트: 전진 기능
+  - [x] 구현: move(), getPosition()
+  - [x] 테스트: 상태 표현
+  - [x] 구현: getStatusBar()
 
-- [ ] `MoveCondition` 인터페이스 & `RandomMoveCondition`
-    - [ ] 테스트: 무작위 조건 판단
-    - [ ] 구현: isSatisfied()
+- [x] `MoveCondition` 인터페이스 & `RandomMoveCondition`
+  - [x] 테스트: 무작위 조건 판단
+  - [x] 구현: isSatisfied()
 
-- [ ] `Cars` 클래스
-    - [ ] 테스트: 자동차 집합 생성
-    - [ ] 구현: 생성자
-    - [ ] 테스트: 일괄 이동
-    - [ ] 구현: moveAll()
-    - [ ] 테스트: 우승자 판정
-    - [ ] 구현: getWinners(), getMaxPosition()
+- [x] `Cars` 클래스
+  - [x] 테스트: 자동차 집합 생성
+  - [x] 구현: 생성자
+  - [x] 테스트: 일괄 이동
+  - [x] 구현: moveAll()
+  - [x] 테스트: 우승자 판정
+  - [x] 구현: getWinners(), getMaxPosition()
 
-- [ ] `RacingGame` 클래스
-    - [ ] 테스트: 게임 진행
-    - [ ] 구현: playRound(), hasNextRound()
-    - [ ] 테스트: 우승자 조회
-    - [ ] 구현: getWinners()
+- [x] `RacingGame` 클래스
+  - [x] 테스트: 게임 진행
+  - [x] 구현: playRound(), hasNextRound()
+  - [x] 테스트: 우승자 조회
+  - [x] 구현: getWinners()
 
 ### 3단계: 검증 계층
-- [ ] `InputValidator` 클래스
-    - [ ] 테스트: 이름 검증
-    - [ ] 구현: validateCarName()
-    - [ ] 테스트: 시도 횟수 검증
-    - [ ] 구현: validateTryCount()
+- [x] `InputValidator` 클래스
+  - [x] 테스트: 이름 검증
+  - [x] 구현: validateCarName()
+  - [x] 테스트: 시도 횟수 검증
+  - [x] 구현: validateTryCount()
 
 ### 4단계: 뷰 계층
-- [ ] `InputView` 클래스
-    - [ ] 구현: readCarNames()
-    - [ ] 구현: readTryCount()
+- [x] `InputView` 클래스
+  - [x] 구현: readCarNames()
+  - [x] 구현: readTryCount()
 
-- [ ] `OutputView` 클래스
-    - [ ] 구현: printRoundResult()
-    - [ ] 구현: printWinners()
+- [x] `OutputView` 클래스
+  - [x] 구현: printRoundResult()
+  - [x] 구현: printWinners()
 
 ### 5단계: 컨트롤러 통합
-- [ ] `RacingGameController` 클래스
-    - [ ] 구현: run()
-    - [ ] 예외 처리 통합
+- [x] `RacingGameController` 클래스
+  - [x] 구현: run()
+  - [x] 예외 처리 통합
 
 ### 6단계: 리팩토링 및 최종 점검
-- [ ] 매직 넘버 상수화
-- [ ] 메서드 분리 (indent depth 2 이하)
-- [ ] 코드 포매팅
-- [ ] 전체 테스트 실행 확인
+- [x] 매직 넘버 상수화
+- [x] 메서드 분리 (indent depth 2 이하)
+- [x] 코드 포매팅
+- [x] 전체 테스트 실행 확인
 
 ---
 
