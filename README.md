@@ -460,63 +460,12 @@ Controller → OutputView.printWinners(winners)
 
 ---
 
-### 1단계: 프로젝트 설정
-- [x] 패키지 구조 생성
-- [x] README.md 작성
-
-### 2단계: 도메인 모델 (TDD)
-- [x] `Car` 클래스
-  - [x] 테스트: 생성 및 이름 반환
-  - [x] 구현: 생성자, getName()
-  - [x] 테스트: 전진 기능
-  - [x] 구현: move(), getPosition()
-  - [x] 테스트: 상태 표현
-  - [x] 구현: getStatusBar()
-
-- [x] `MoveCondition` 인터페이스 & `RandomMoveCondition`
-  - [x] 테스트: 무작위 조건 판단
-  - [x] 구현: isSatisfied()
-
-- [x] `Cars` 클래스
-  - [x] 테스트: 자동차 집합 생성
-  - [x] 구현: 생성자
-  - [x] 테스트: 일괄 이동
-  - [x] 구현: moveAll()
-  - [x] 테스트: 우승자 판정
-  - [x] 구현: getWinners(), getMaxPosition()
-
-- [x] `RacingGame` 클래스
-  - [x] 테스트: 게임 진행
-  - [x] 구현: playRound(), hasNextRound()
-  - [x] 테스트: 우승자 조회
-  - [x] 구현: getWinners()
-
-### 3단계: 검증 계층
-- [x] `InputValidator` 클래스
-  - [x] 테스트: 이름 검증
-  - [x] 구현: validateCarName()
-  - [x] 테스트: 시도 횟수 검증
-  - [x] 구현: validateTryCount()
-
-### 4단계: 뷰 계층
-- [x] `InputView` 클래스
-  - [x] 구현: readCarNames()
-  - [x] 구현: readTryCount()
-
-- [x] `OutputView` 클래스
-  - [x] 구현: printRoundResult()
-  - [x] 구현: printWinners()
-
-### 5단계: 컨트롤러 통합
-- [x] `RacingGameController` 클래스
-  - [x] 구현: run()
-  - [x] 예외 처리 통합
-
-### 6단계: 리팩토링 및 최종 점검
-- [x] 매직 넘버 상수화
-- [x] 메서드 분리 (indent depth 2 이하)
-- [x] 코드 포매팅
-- [x] 전체 테스트 실행 확인
+## 구현 순서
+1. [x] 도메인 계층 (Car, Cars, RacingGame, MoveCondition)
+2. [x] 검증 계층 (InputValidator)
+3. [x] 뷰 계층 (InputView, OutputView)
+4. [x] 컨트롤러 통합 (RacingGameController)
+5. [x] 리팩토링 및 테스트
 
 ---
 
@@ -527,7 +476,7 @@ Controller → OutputView.printWinners(winners)
 경주할 자동차 이름을 입력하세요.(이름은 쉼표(,) 기준으로 구분)
 pobi,woni,jun
 시도할 횟수는 몇 회인가요?
-5
+2
 ```
 
 ### 출력
@@ -540,18 +489,6 @@ jun : -
 pobi : --
 woni : -
 jun : --
-
-pobi : ---
-woni : --
-jun : ---
-
-pobi : ----
-woni : ---
-jun : ----
-
-pobi : -----
-woni : ----
-jun : -----
 
 최종 우승자 : pobi, jun
 ```
