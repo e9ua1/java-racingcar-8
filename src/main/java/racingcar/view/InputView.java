@@ -15,17 +15,13 @@ public class InputView {
     public List<String> readCarNames() {
         System.out.println(CAR_NAMES_INPUT_MESSAGE);
         String input = Console.readLine();
-        List<String> names = parseCarNames(input);
-        InputValidator.validateCarNames(names);
-        return names;
+        return parseCarNames(input);
     }
 
     public int readTryCount() {
         System.out.println(TRY_COUNT_INPUT_MESSAGE);
         String input = Console.readLine();
-        int count = parseTryCount(input);
-        InputValidator.validateTryCount(count);
-        return count;
+        return parseTryCount(input);
     }
 
     private List<String> parseCarNames(String input) {
