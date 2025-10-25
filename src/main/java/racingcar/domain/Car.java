@@ -29,6 +29,12 @@ public class Car {
         }
     }
 
+    public void move(boolean canMove) {
+        if (canMove) {
+            position++;
+        }
+    }
+
     public String getName() {
         return name;
     }
