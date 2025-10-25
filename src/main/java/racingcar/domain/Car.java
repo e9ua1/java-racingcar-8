@@ -2,6 +2,7 @@ package racingcar.domain;
 
 public class Car {
     private static final int MAX_NAME_LENGTH = 5;
+    private static final String POSITION_MARKER = "-";
 
     private final String name;
     private int position;
@@ -33,6 +34,10 @@ public class Car {
         if (canMove) {
             position++;
         }
+    }
+
+    public String getStatusBar() {
+        return POSITION_MARKER.repeat(position);
     }
 
     public String getName() {
