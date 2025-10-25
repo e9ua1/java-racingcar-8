@@ -31,8 +31,6 @@ public class RacingGameController {
 
             playGame(game);
             printWinners(game);
-        } catch (IllegalArgumentException e) {
-            System.out.println("[ERROR] " + e.getMessage());
         } finally {
             Console.close();
         }
