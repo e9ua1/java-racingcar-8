@@ -1,7 +1,5 @@
 package racingcar.controller;
 
-import camp.nextstep.edu.missionutils.Console;
-
 import java.util.List;
 
 import racingcar.domain.Cars;
@@ -22,19 +20,15 @@ public class RacingGameController {
     }
 
     public void run() {
-        try {
-            List<String> carNames = inputView.readCarNames();
-            int tryCount = inputView.readTryCount();
+        List<String> carNames = inputView.readCarNames();
+        int tryCount = inputView.readTryCount();
 
-            Cars cars = new Cars(carNames);
-            MoveCondition condition = new RandomMoveCondition();
-            RacingGame game = new RacingGame(cars, tryCount, condition);
+        Cars cars = new Cars(carNames);
+        MoveCondition condition = new RandomMoveCondition();
+        RacingGame game = new RacingGame(cars, tryCount, condition);
 
-            playGame(game);
-            printWinners(game);
-        } finally {
-            Console.close();
-        }
+        playGame(game);
+        printWinners(game);
     }
 
     private void playGame(RacingGame game) {
