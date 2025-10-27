@@ -1,9 +1,9 @@
 package racingcar.view;
 
+import java.util.List;
+
 import racingcar.domain.Car;
 import racingcar.domain.Cars;
-
-import java.util.List;
 
 public class OutputView {
 
