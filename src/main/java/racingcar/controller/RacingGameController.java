@@ -6,6 +6,7 @@ import racingcar.domain.Cars;
 import racingcar.domain.RacingGame;
 import racingcar.domain.condition.MoveCondition;
 import racingcar.domain.condition.RandomMoveCondition;
+import racingcar.view.InputParser;
 import racingcar.view.InputView;
 import racingcar.view.OutputView;
 
@@ -20,8 +21,8 @@ public class RacingGameController {
     }
 
     public void run() {
-        List<String> carNames = inputView.readCarNames();
-        int tryCount = inputView.readTryCount();
+        List<String> carNames = InputParser.parseCarNames(inputView.readCarNamesInput());
+        int tryCount = InputParser.parseTryCount(inputView.readTryCountInput());
 
         Cars cars = new Cars(carNames);
         MoveCondition condition = new RandomMoveCondition();
