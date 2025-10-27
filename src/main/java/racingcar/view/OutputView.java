@@ -12,11 +12,11 @@ public class OutputView {
     private static final String NAME_POSITION_SEPARATOR = " : ";
     private static final String WINNER_DELIMITER = ", ";
 
-    public void printResultHeader() {
+    public void printHeader() {
         System.out.println(RESULT_HEADER);
     }
 
-    public void printRoundResult(Cars cars) {
+    public void printRound(Cars cars) {
         for (Car car : cars.getCars()) {
             printCarStatus(car);
         }

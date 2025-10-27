@@ -33,10 +33,10 @@ public class RacingGameController {
     }
 
     private void playGame(RacingGame game) {
-        outputView.printResultHeader();
+        outputView.printHeader();
         while (game.hasNextRound()) {
             game.playRound();
-            outputView.printRoundResult(game.getCars());
+            outputView.printRound(game.getCars());
         }
     }
 
