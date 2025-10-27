@@ -1,6 +1,5 @@
 package racingcar.domain;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,11 +25,9 @@ public class Cars {
     }
 
     private List<Car> createCars(List<String> names) {
-        List<Car> cars = new ArrayList<>();
-        for (String name : names) {
-            cars.add(new Car(name));
-        }
-        return cars;
+        return names.stream()
+                .map(Car::new)
+                .toList();
     }
 
     public void moveAll(MoveCondition condition) {
@@ -41,15 +38,10 @@ public class Cars {
 
     public List<String> getWinners() {
         int maxPosition = getMaxPosition();
-        List<String> winners = new ArrayList<>();
-
-        for (Car car : cars) {
-            if (car.isAt(maxPosition)) {
-                winners.add(car.getName());
-            }
-        }
-
-        return winners;
+        return cars.stream()
+                .filter(car -> car.isAt(maxPosition))
+                .map(Car::getName)
+                .toList();
     }
 
     public int getMaxPosition() {

@@ -3,7 +3,7 @@ package racingcar.view;
 import java.util.Arrays;
 import java.util.List;
 
-public class InputParser {
+public final class InputParser {
 
     private static final String DELIMITER = ",";
 
