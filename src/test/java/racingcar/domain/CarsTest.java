@@ -123,6 +123,7 @@ class CarsTest {
 
     // 테스트 헬퍼 클래스
     private static class NTimesTrueMoveCondition implements MoveCondition {
+
         private final int times;
         private int count;
 

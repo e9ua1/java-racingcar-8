@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("자동차 테스트")
 public class CarTest {
+
     @Nested
     @DisplayName("자동차 생성")
     class CreateTest {

@@ -7,6 +7,7 @@ import java.util.List;
 import racingcar.domain.condition.MoveCondition;
 
 public class Cars {
+
     private static final int MIN_CAR_COUNT = 1;
 
     private final List<Car> cars;

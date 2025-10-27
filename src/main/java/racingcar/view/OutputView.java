@@ -6,6 +6,7 @@ import racingcar.domain.Cars;
 import java.util.List;
 
 public class OutputView {
+
     private static final String RESULT_HEADER = "\n실행 결과";
     private static final String WINNER_PREFIX = "최종 우승자 : ";
     private static final String NAME_POSITION_SEPARATOR = " : ";

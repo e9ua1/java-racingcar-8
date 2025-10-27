@@ -5,6 +5,7 @@ import java.util.List;
 import racingcar.domain.condition.MoveCondition;
 
 public class RacingGame {
+
     private static final int MIN_TRY_COUNT = 1;
 
     private final Cars cars;
