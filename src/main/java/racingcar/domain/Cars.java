@@ -20,7 +20,8 @@ public class Cars {
 
     private void validateCarCount(List<String> names) {
         if (names.size() < MIN_CAR_COUNT) {
-            throw new IllegalArgumentException("자동차는 최소 " + MIN_CAR_COUNT + "대 이상이어야 합니다.");
+            throw new IllegalArgumentException(
+                    "자동차는 최소 " + MIN_CAR_COUNT + "대 이상이어야 합니다.");
         }
     }
 
