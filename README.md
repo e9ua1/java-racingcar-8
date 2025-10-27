@@ -115,8 +115,8 @@ src/test/java/racingcar
     ┌──────────────────┐        ┌──────────────────────┐
     │   InputView      │        │    OutputView        │
     │──────────────────│        │──────────────────────│
-    │+ readCarNames()  │        │+ printResultHeader() │
-    │+ readTryCount()  │        │+ printRoundResult()  │
+    │+ readCarNames()  │        │+ printHeader()       │
+    │+ readTryCount()  │        │+ printRound()        │
     └────────┬─────────┘        │+ printWinners()      │
              │                  └──────────────────────┘
              │ uses
@@ -310,8 +310,8 @@ src/test/java/racingcar
 - 사용자에게 안내 메시지를 출력한다.
 
 **주요 메서드:**
-- `void printResultHeader()`: "실행 결과" 헤더 출력
-- `void printRoundResult(Cars cars)`: 라운드 결과 출력
+- `void printHeader()`: 실행 결과 헤더 출력
+- `void printRound(Cars cars)`: 라운드 결과 출력
 - `void printWinners(List<String> winners)`: 우승자 출력
 
 **출력 형식:**
@@ -419,7 +419,7 @@ Controller → RacingGame.playRound()
          ↓
     Car.position 증가 또는 유지
          ↓
-Controller → OutputView.printRoundResult(Cars)
+Controller → OutputView.printRound(Cars)
          ↓
     각 Car의 이름과 위치(-) 출력
 ```
@@ -512,18 +512,6 @@ Controller → OutputView.printWinners(winners)
 ├── 이동 조건은 boolean 값을 반환한다
 └── 반복 테스트 시 true와 false가 모두 나타난다
 ```
-
----
-
-## 구현 순서
-1. [x] 도메인 계층 (Car, Cars, RacingGame, MoveCondition)
-2. [x] 뷰 계층 (InputView, OutputView)
-3. [x] 컨트롤러 통합 (RacingGameController)
-4. [x] 리팩토링 - 도메인 중심 검증으로 전환
-5. [x] 리팩토링 - InputParser 분리 (책임 분리)
-6. [x] 리팩토링 - 의존성 주입 적용
-7. [x] 리팩토링 - Tell, Don't Ask 원칙 적용
-8. [x] 테스트 완성
 
 ---
 
