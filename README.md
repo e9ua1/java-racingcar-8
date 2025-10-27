@@ -15,6 +15,7 @@
 - **단일 책임 원칙(SRP)**: 하나의 클래스/메서드는 하나의 책임만 가지도록 설계
 - **함수 분리**: 큰 함수를 작은 단위로 분리하여 가독성과 유지보수성 향상
 - **객체 지향 설계**: 책임 주도 설계를 통한 객체 간 협력 구조 구축
+- **의존성 주입**: 제어의 역전(IoC)을 통한 유연한 설계
 
 ---
 
@@ -72,16 +73,18 @@ src/main/java/racingcar
 │       ├── MoveCondition.java
 │       └── RandomMoveCondition.java
 └── view
+    ├── InputParser.java
     ├── InputView.java
     └── OutputView.java
 
 src/test/java/racingcar
-├── domain
-│   ├── CarTest.java
-│   ├── CarsTest.java
-│   ├── RacingGameTest.java
-│   └── condition
-│       └── RandomMoveConditionTest.java
+├── ApplicationTest.java
+└── domain
+    ├── CarTest.java
+    ├── CarsTest.java
+    ├── RacingGameTest.java
+    └── condition
+        └── RandomMoveConditionTest.java
 ```
 
 ---
@@ -89,28 +92,44 @@ src/test/java/racingcar
 ### 클래스 다이어그램
 ```
                 ┌─────────────────────────┐
+                │      Application        │
+                │─────────────────────────│
+                │ + main()                │
+                └─────────┬───────────────┘
+                          │ creates
+                          ▼
+                ┌─────────────────────────┐
                 │  RacingGameController   │
                 │─────────────────────────│
-                │ - inputView             │
-                │ - outputView            │
+                │ - inputView             │◀── 생성자 주입
+                │ - outputView            │◀── 생성자 주입
                 │─────────────────────────│
                 │ + run()                 │
                 │ - playGame()            │
                 │ - printWinners()        │
                 └─────────┬───────────────┘
                           │
-              ┌───────────┴───────────┐
-              │                       │
-              ▼                       ▼
-    ┌──────────────────┐    ┌──────────────────────┐
-    │   InputView      │    │    OutputView        │
-    │──────────────────│    │──────────────────────│
-    │+ readCarNames()  │    │+ printResultHeader() │
-    │+ readTryCount()  │    │+ printRoundResult()  │
-    └──────────────────┘    │+ printWinners()      │
-              │             └──────────────────────┘
-              │ creates
-              ▼
+              ┌───────────┴───────────────┐
+              │                           │
+              ▼                           ▼
+    ┌──────────────────┐        ┌──────────────────────┐
+    │   InputView      │        │    OutputView        │
+    │──────────────────│        │──────────────────────│
+    │+ readCarNames()  │        │+ printResultHeader() │
+    │+ readTryCount()  │        │+ printRoundResult()  │
+    └────────┬─────────┘        │+ printWinners()      │
+             │                  └──────────────────────┘
+             │ uses
+             ▼
+    ┌─────────────────────┐
+    │    InputParser      │
+    │─────────────────────│
+    │+ parseCarNames()    │ (static)
+    │+ parseTryCount()    │ (static)
+    └─────────────────────┘
+             │
+             │ creates
+             ▼
     ┌─────────────────────┐
     │    RacingGame       │
     │─────────────────────│
@@ -133,9 +152,10 @@ src/test/java/racingcar
     │─────────────────────│            │ - position       │
     │ + moveAll()         │            │──────────────────│
     │ + getWinners()      │            │ + move()         │
-    │ + getMaxPosition()  │            │ + getPosition()  │
-    │ + getCars()         │            │ + getName()      │
-    └─────────────────────┘            │ + getStatusBar() │
+    │ + getMaxPosition()  │            │ + isAt()         │◀── Tell, Don't Ask
+    │ + getCars()         │            │ + getPosition()  │
+    └─────────────────────┘            │ + getName()      │
+                                       │ + getStatusBar() │
                                        └────────┬─────────┘
                                                 │ uses
                                                 ▼
@@ -168,12 +188,14 @@ src/test/java/racingcar
 **책임:**
 - 자동차의 이름과 위치를 관리한다.
 - 주어진 조건에 따라 전진한다.
+- 자신의 위치 상태를 판단한다. (Tell, Don't Ask 적용)
 - 현재 위치를 시각적으로 표현한다.
 - 생성 시 이름 유효성을 검증한다.
 
 **주요 메서드:**
 - `Car(String name)`: 이름으로 자동차 생성 (이름 검증 포함)
 - `void move(boolean canMove)`: 조건이 참이면 전진
+- `boolean isAt(int position)`: 특정 위치에 있는지 확인 (캡슐화)
 - `int getPosition()`: 현재 위치 반환
 - `String getName()`: 자동차 이름 반환
 - `String getStatusBar()`: 위치만큼 `-` 문자 반환
@@ -186,7 +208,7 @@ src/test/java/racingcar
 
 ##### `Cars` - 자동차 집합
 **책임:**
-- 여러 자동차를 관리한다.
+- 여러 자동차를 관리한다. (일급 컬렉션)
 - 모든 자동차를 일괄 이동시킨다.
 - 우승자를 판정한다.
 - 생성 시 자동차 개수를 검증한다.
@@ -196,16 +218,19 @@ src/test/java/racingcar
 - `void moveAll(MoveCondition condition)`: 모든 자동차 이동
 - `List<String> getWinners()`: 우승자 이름 목록 반환
 - `int getMaxPosition()`: 최대 전진 거리 반환
-- `List<Car> getCars()`: 자동차 목록 반환
+- `List<Car> getCars()`: 불변 자동차 목록 반환
 
 **검증 규칙:**
 - 최소 1대 이상의 자동차 필요
+
+**상수:**
+- `DEFAULT_POSITION = 0`: 자동차가 없을 때 기본 위치
 
 ---
 
 ##### `MoveCondition` - 이동 조건 인터페이스
 **책임:**
-- 전진 가능 여부를 판단하는 계약을 정의한다.
+- 전진 가능 여부를 판단하는 계약을 정의한다. (전략 패턴)
 
 **주요 메서드:**
 - `boolean isSatisfied()`: 전진 조건 만족 여부 반환
@@ -251,15 +276,30 @@ src/test/java/racingcar
 ##### `InputView` - 입력 뷰
 **책임:**
 - 사용자로부터 입력을 받는다.
-- 입력값을 적절한 형태로 파싱한다.
+- 입력 메시지를 출력한다.
 
 **주요 메서드:**
-- `List<String> readCarNames()`: 자동차 이름 목록 입력
-- `int readTryCount()`: 시도 횟수 입력
+- `String readCarNames()`: 자동차 이름 문자열 입력
+- `String readTryCount()`: 시도 횟수 문자열 입력
 
 **입력 형식:**
 - 자동차 이름: `pobi,crong,honux`
 - 시도 횟수: `5`
+
+---
+
+##### `InputParser` - 입력 파싱 유틸리티
+**책임:**
+- 입력 문자열을 적절한 타입으로 변환한다.
+- 파싱 중 발생하는 예외를 처리한다.
+
+**주요 메서드:**
+- `static List<String> parseCarNames(String input)`: 쉼표로 구분된 이름을 리스트로 변환
+- `static int parseTryCount(String input)`: 문자열을 정수로 변환
+
+**설계 이유:**
+- View는 입출력만, Parser는 데이터 변환만 담당 (단일 책임 원칙)
+- 파싱 로직을 독립적으로 테스트 가능
 
 ---
 
@@ -270,9 +310,9 @@ src/test/java/racingcar
 - 사용자에게 안내 메시지를 출력한다.
 
 **주요 메서드:**
+- `void printResultHeader()`: "실행 결과" 헤더 출력
 - `void printRoundResult(Cars cars)`: 라운드 결과 출력
 - `void printWinners(List<String> winners)`: 우승자 출력
-- `void printResultHeader()`: "실행 결과" 헤더 출력
 
 **출력 형식:**
 ```
@@ -292,15 +332,33 @@ honux : --
 - 예외를 전파한다.
 
 **주요 메서드:**
+- `RacingGameController(InputView, OutputView)`: 의존성 주입 생성자
 - `void run()`: 게임 실행
 - `void playGame(RacingGame game)`: 게임 진행
 - `void printWinners(RacingGame game)`: 우승자 출력
 
 **실행 흐름:**
-1. 자동차 이름 입력
-2. 시도 횟수 입력
+1. 자동차 이름 입력 및 파싱
+2. 시도 횟수 입력 및 파싱
 3. 게임 진행 및 결과 출력
 4. 우승자 발표
+
+**의존성 주입:**
+- InputView와 OutputView를 생성자로 주입받음
+- 테스트 용이성 및 유연성 확보
+
+---
+
+#### **애플리케이션 진입점**
+
+##### `Application`
+**책임:**
+- 프로그램의 시작점
+- 의존성 생성 및 조립
+- 리소스 관리 (Console.close())
+
+**주요 메서드:**
+- `static void main(String[] args)`: 프로그램 진입점
 
 ---
 
@@ -308,31 +366,48 @@ honux : --
 
 ### 전체 흐름도
 ```
-Application
+Application (의존성 생성 및 조립)
     ↓
-RacingGameController ←→ InputView
-    ↓                      ↓
-    ↓                 OutputView
-    ↓
-RacingGame
-    ↓
-Cars (일급 컬렉션)
-    ↓
-Car[] + MoveCondition
+    ├─ InputView
+    ├─ OutputView
+    └─ RacingGameController (의존성 주입) ←→ InputParser
+            ↓
+        RacingGame
+            ↓
+        Cars (일급 컬렉션)
+            ↓
+        Car[] + MoveCondition
 ```
 
 ### 상세 협력 과정
 
-#### 1️⃣ 게임 초기화
+#### 1️⃣ 애플리케이션 시작 및 의존성 주입
 ```
-Controller → InputView
+Application.main()
+    ↓
+InputView, OutputView 생성
+    ↓
+RacingGameController 생성 (의존성 주입)
+    ↓
+controller.run()
+```
+
+#### 2️⃣ 게임 초기화
+```
+Controller → InputView.readCarNames()
+         ↓
+    InputParser.parseCarNames() → List<String>
          ↓
     Cars 생성 → Car 객체들 생성 (각자 이름 검증)
+         ↓
+Controller → InputView.readTryCount()
+         ↓
+    InputParser.parseTryCount() → int
          ↓
     RacingGame 생성 (Cars, tryCount 검증, MoveCondition)
 ```
 
-#### 2️⃣ 라운드 진행 (반복)
+#### 3️⃣ 라운드 진행 (반복)
 ```
 Controller → RacingGame.playRound()
          ↓
@@ -349,13 +424,15 @@ Controller → OutputView.printRoundResult(Cars)
     각 Car의 이름과 위치(-) 출력
 ```
 
-#### 3️⃣ 우승자 판정
+#### 4️⃣ 우승자 판정
 ```
 Controller → RacingGame.getWinners()
          ↓
     Cars.getWinners()
          ↓
     Cars.getMaxPosition() → 최대 위치 계산
+         ↓
+    각 Car.isAt(maxPosition) 확인 (Tell, Don't Ask)
          ↓
     최대 위치와 같은 Car들의 이름 수집
          ↓
@@ -368,12 +445,15 @@ Controller → OutputView.printWinners(winners)
 
 | 계층 | 클래스 | 책임 |
 |------|--------|------|
+| **Application** | Application | 의존성 생성 및 조립, 리소스 관리 |
 | **Controller** | RacingGameController | 전체 흐름 제어, View와 Domain 연결 |
-| **View** | InputView, OutputView | 사용자 입출력 |
+| **View** | InputView | 사용자 입력 받기 |
+| **View** | InputParser | 입력 문자열 파싱 및 변환 |
+| **View** | OutputView | 결과 출력 |
 | **Domain** | RacingGame | 게임 진행 관리, tryCount 검증 |
 | **Domain** | Cars | 자동차 집합 관리 (일급 컬렉션), 개수 검증 |
 | **Domain** | Car | 개별 자동차 상태 및 이동, 이름 검증 |
-| **Domain** | MoveCondition | 전진 조건 판단 |
+| **Domain** | MoveCondition | 전진 조건 판단 (전략 패턴) |
 
 ---
 
@@ -384,46 +464,44 @@ Controller → OutputView.printWinners(winners)
 #### `CarTest` - 자동차 단위 테스트
 ```
 자동차 테스트
-├── 생성 테스트
+├── 자동차를 생성한다
 │   ├── 이름으로 자동차를 생성한다
-│   ├── 이름이 빈 값이면 예외가 발생한다
-│   ├── 이름이 5자를 초과하면 예외가 발생한다
-│   └── 초기 위치는 0이다
-├── 이동 테스트
+│   ├── 초기 위치는 0이다
+│   ├── 이름이 빈 값이거나 공백이면 예외가 발생한다
+│   └── 이름이 5글자 초과하면 예외가 발생한다
+├── 자동차를 이동한다
 │   ├── 전진 조건이 참이면 위치가 1 증가한다
 │   ├── 전진 조건이 거짓이면 위치가 변하지 않는다
 │   └── 여러 번 전진할 수 있다
-└── 상태 표현 테스트
+└── 자동차 상태를 표현한다
     ├── 위치가 0이면 빈 문자열을 반환한다
-    ├── 위치만큼 '-' 문자를 반환한다
-    └── 이름과 상태를 형식에 맞게 표현한다
+    └── 위치만큼 '-' 문자를 반환한다
 ```
 
 #### `CarsTest` - 자동차 집합 테스트
 ```
 자동차 집합 테스트
-├── 생성 테스트
+├── 자동차 집합을 생성한다
 │   ├── 이름 목록으로 여러 자동차를 생성한다
 │   └── 빈 목록으로 생성하면 예외가 발생한다
-├── 이동 테스트
-│   ├── 모든 자동차가 동시에 이동한다
-│   └── 각 자동차는 독립적으로 이동 여부를 판단한다
-└── 우승자 판정 테스트
-    ├── 가장 많이 전진한 자동차를 찾는다
-    ├── 우승자가 여러 명이면 모두 반환한다
-    └── 최대 위치를 계산한다
+├── 자동차를 일괄 이동한다
+│   ├── 모든 자동차가 이동 조건을 확인한다
+│   └── 조건에 따라 각 자동차는 독립적으로 이동한다
+└── 우승자를 판정한다
+    ├── 가장 많이 전진한 자동차의 최대 위치를 반환한다
+    └── 단독 우승자를 찾는다
 ```
 
 #### `RacingGameTest` - 경주 게임 테스트
 ```
 경주 게임 테스트
-├── 게임 생성
-│   ├── 게임을 생성한다
+├── 게임을 생성한다
+│   ├── 게임이 정상적으로 생성된다
 │   └── 시도 횟수가 1 미만이면 예외가 발생한다
-├── 게임 진행
+├── 게임을 진행한다
 │   ├── 라운드를 진행하면 모든 자동차가 이동한다
 │   └── 지정된 횟수만큼 라운드가 존재한다
-└── 게임 결과
+└── 게임 결과를 확인한다
     ├── 게임 종료 후 우승자를 반환한다
     └── 현재 자동차 상태를 조회한다
 ```
@@ -431,11 +509,8 @@ Controller → OutputView.printWinners(winners)
 #### `RandomMoveConditionTest` - 이동 조건 테스트
 ```
 무작위 이동 조건 테스트
-├── 전진 조건 테스트
-│   ├── 무작위 값을 생성한다
-│   └── 반복 테스트로 무작위성을 확인한다
-└── 경계값 테스트
-    └── 항상 boolean 값을 반환한다
+├── 이동 조건은 boolean 값을 반환한다
+└── 반복 테스트 시 true와 false가 모두 나타난다
 ```
 
 ---
@@ -445,7 +520,10 @@ Controller → OutputView.printWinners(winners)
 2. [x] 뷰 계층 (InputView, OutputView)
 3. [x] 컨트롤러 통합 (RacingGameController)
 4. [x] 리팩토링 - 도메인 중심 검증으로 전환
-5. [x] 테스트 완성
+5. [x] 리팩토링 - InputParser 분리 (책임 분리)
+6. [x] 리팩토링 - 의존성 주입 적용
+7. [x] 리팩토링 - Tell, Don't Ask 원칙 적용
+8. [x] 테스트 완성
 
 ---
 
@@ -487,6 +565,7 @@ jun : --
 
 ### 코딩 컨벤션
 - Java Style Guide 준수
+- 라인 길이 120자 이하 유지
 - Indent depth 2 이하 유지
 - 3항 연산자 사용 금지
 - 축약 금지, 의미 있는 이름 사용
@@ -516,8 +595,86 @@ jun : --
 - MoveCondition 인터페이스로 이동 조건 추상화
 - RandomMoveCondition 구현체
 - 테스트에서 조건을 주입하여 검증 용이
+- 다른 이동 조건으로 쉽게 확장 가능
 
 ### 3. 일급 컬렉션
 - Cars 클래스로 List<Car> 캡슐화
 - 자동차 집합 관련 로직 응집
 - 우승자 판정, 일괄 이동 등 책임 명확
+- 불변 리스트 반환으로 외부 변경 방지
+
+### 4. 의존성 주입 (Dependency Injection)
+- Controller가 View 의존성을 생성자로 주입받음
+- 제어의 역전(IoC) 원칙 적용
+- 테스트 용이성 향상 (Mock 주입 가능)
+- View 구현체 변경 용이 (Console → File/GUI)
+
+### 5. 책임 분리
+- **InputView**: 입력 받기만
+- **InputParser**: 파싱 및 변환만
+- **OutputView**: 출력만
+- **Controller**: 흐름 제어만
+- 단일 책임 원칙(SRP) 준수
+
+### 6. Tell, Don't Ask 원칙
+- `Car.isAt(position)`: Car에게 물어봄
+- `car.getPosition() == maxPosition` 대신 `car.isAt(maxPosition)` 사용
+- 객체의 내부 상태를 직접 꺼내지 않고, 객체에게 판단 요청
+- 캡슐화 강화 및 객체 책임 명확화
+
+### 7. 매직 넘버 상수화
+- 모든 숫자 리터럴을 의미 있는 상수로 선언
+- `DEFAULT_POSITION`, `MIN_CAR_COUNT`, `MOVE_THRESHOLD` 등
+- 가독성 향상 및 유지보수 용이
+
+### 8. 리소스 관리
+- `Console.close()`를 Application에서 관리
+- try-finally로 리소스 안전 해제
+- Controller는 흐름 제어에만 집중
+
+---
+
+## 리팩토링 히스토리
+
+### 주요 개선 사항
+
+1. **타입 선언과 멤버 사이 공백 추가**
+  - 클래스/인터페이스 선언 후 한 줄 공백 추가
+  - Java 코드 컨벤션 준수
+
+2. **테스트 DisplayName 명명 규칙 통일**
+  - 최상위 테스트 클래스: 명사형
+  - @Nested 클래스: 동사형 문장 ("~한다")
+  - 테스트 계층별 일관성 확보
+
+3. **Console.close()를 Application으로 이동**
+  - 리소스 관리 책임을 애플리케이션 진입점으로 이동
+  - Controller의 책임을 게임 흐름 제어로 명확히 분리
+
+4. **getMaxPosition의 기본값을 상수로 추출**
+  - 매직 넘버 0을 DEFAULT_POSITION 상수로 대체
+  - 코드의 의도를 명확하게 표현
+
+5. **Car에 위치 비교 메서드 추가**
+  - getPosition() getter 대신 isAt() 메서드 사용
+  - Tell, Don't Ask 원칙 적용
+  - Car의 캡슐화 강화
+
+6. **InputView에서 파싱 책임 분리**
+  - InputView는 사용자 입력만 담당
+  - 파싱 로직을 InputParser 클래스로 분리
+  - 단일 책임 원칙 적용 및 재사용성 향상
+
+7. **InputView 메서드명에서 중복 제거**
+  - readCarNamesInput → readCarNames
+  - readTryCountInput → readTryCount
+  - 간결성 향상
+
+8. **120자 열 제한 준수**
+  - 긴 문자열과 예외 메시지를 줄바꿈 처리
+  - 코드 컨벤션 준수
+
+9. **Controller에 의존성 주입 적용**
+  - InputView, OutputView를 생성자 주입으로 변경
+  - 제어의 역전(IoC) 원칙 적용
+  - 테스트 용이성 및 유연성 향상
