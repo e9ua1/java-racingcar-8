@@ -43,7 +43,7 @@ public class Cars {
         List<String> winners = new ArrayList<>();
 
         for (Car car : cars) {
-            if (car.getPosition() == maxPosition) {
+            if (car.isAt(maxPosition)) {
                 winners.add(car.getName());
             }
         }

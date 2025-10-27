@@ -37,6 +37,10 @@ public class Car {
         }
     }
 
+    public boolean isAt(int position) {
+        return this.position == position;
+    }
+
     public String getStatusBar() {
         return POSITION_MARKER.repeat(position);
     }
