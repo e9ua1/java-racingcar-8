@@ -14,11 +14,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RacingGameTest {
 
     @Nested
-    @DisplayName("게임 생성")
+    @DisplayName("게임을 생성한다")
     class CreateTest {
 
         @Test
-        @DisplayName("게임을 생성한다")
+        @DisplayName("게임이 정상적으로 생성된다")
         void createGame() {
             // given
             Cars cars = new Cars(List.of("pobi", "crong"));
@@ -48,7 +48,7 @@ class RacingGameTest {
     }
 
     @Nested
-    @DisplayName("게임 진행")
+    @DisplayName("게임을 진행한다")
     class PlayTest {
 
         @Test
@@ -91,7 +91,7 @@ class RacingGameTest {
     }
 
     @Nested
-    @DisplayName("게임 결과")
+    @DisplayName("게임 결과를 확인한다")
     class ResultTest {
 
         @Test

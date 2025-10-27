@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class CarTest {
 
     @Nested
-    @DisplayName("자동차 생성")
+    @DisplayName("자동차를 생성한다")
     class CreateTest {
 
         @Test
@@ -60,7 +60,7 @@ public class CarTest {
     }
 
     @Nested
-    @DisplayName("자동차 이동")
+    @DisplayName("자동차를 이동한다")
     class MoveTest {
 
         private Car car;
@@ -105,7 +105,7 @@ public class CarTest {
     }
 
     @Nested
-    @DisplayName("자동차 상태 표현")
+    @DisplayName("자동차 상태를 표현한다")
     class StatusTest {
 
         @Test
