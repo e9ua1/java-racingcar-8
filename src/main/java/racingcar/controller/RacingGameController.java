@@ -21,8 +21,8 @@ public class RacingGameController {
     }
 
     public void run() {
-        List<String> carNames = InputParser.parseCarNames(inputView.readCarNamesInput());
-        int tryCount = InputParser.parseTryCount(inputView.readTryCountInput());
+        List<String> carNames = InputParser.parseCarNames(inputView.readCarNames());
+        int tryCount = InputParser.parseTryCount(inputView.readTryCount());
 
         Cars cars = new Cars(carNames);
         MoveCondition condition = new RandomMoveCondition();
